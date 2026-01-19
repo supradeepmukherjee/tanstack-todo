@@ -1,4 +1,6 @@
+import TodoFilter from "@/components/TodoFilter";
 import TodoForm from "@/components/TodoForm";
+import TodoList from "@/components/TodoList";
 import { connectDb } from "@/lib/db";
 
 export default async function Home() {
@@ -16,6 +18,8 @@ export default async function Home() {
         </header>
         <main>
           <TodoForm />
+          <TodoFilter />
+          <TodoList />
         </main>
       </div>
     </div>

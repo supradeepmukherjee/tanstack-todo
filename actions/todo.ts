@@ -23,3 +23,20 @@ export const createTodo = async (data: object) => {
         }
     }
 }
+
+export const getTodos = async () => {
+    try {
+        await connectDb()
+        const todos = await Todo.find({}).sort({ createdAt: -1 }).lean()
+        return {
+            success: true,
+            data: todos
+        }
+    } catch (err) {
+        console.error(err);
+        return{
+            success:false,
+            error:'Failed to fetch TODOs'
+        }
+    }
+}
