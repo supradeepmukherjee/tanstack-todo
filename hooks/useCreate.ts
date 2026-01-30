@@ -1,4 +1,4 @@
-import { createTodo, getTodos } from "@/actions/todo"
+import { createTodo, deleteTodo, getTodos, toggleTodo } from "@/actions/todo"
 import { useStore } from "@/store"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
@@ -38,6 +38,30 @@ export const useTodos = () => {
     })
 }
 
-export function toggleTodo=()=>{
-    const 
+export const useToggleTodo = () => {
+    const queryClient = useQueryClient()
+    const updateTodoInStore = useStore(s => s.updateTodo)
+    return useMutation({
+        mutationFn: (id: string) => toggleTodo(id),
+        onSuccess: (result, id) => {
+            if (result.success) {
+                updateTodoInStore(id, { completed: result.data.completed })
+                queryClient.invalidateQueries({ queryKey: todoKeys.lists() })
+            }
+        },
+    })
+}
+
+export const useDeleteTodo = () => {
+    const queryClient = useQueryClient()
+    const deleteTodoInStore = useStore(s => s.deleteTodo)
+    return useMutation({
+        mutationFn: (id: string) => deleteTodo(id),
+        onSuccess: (result, id) => {
+            if (result.success) {
+                deleteTodoInStore(id)
+                queryClient.invalidateQueries({ queryKey: todoKeys.lists() })
+            }
+        },
+    })
 }

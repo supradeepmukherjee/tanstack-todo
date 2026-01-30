@@ -1,14 +1,35 @@
-import { Todo } from "@/types/Todo"
-import { Card, CardContent } from "./ui/card"
+import { useDeleteTodo, useToggleTodo } from "@/hooks/useCreate"
 import { cn } from "@/lib/utils"
-import { Checkbox } from "./ui/checkbox"
-import { Badge } from "./ui/badge"
+import { Todo } from "@/types/Todo"
 import { Calendar, Trash2 } from "lucide-react"
+import { toast } from "sonner"
+import { Badge } from "./ui/badge"
 import { Button } from "./ui/button"
-import { useState } from "react"
+import { Card, CardContent } from "./ui/card"
+import { Checkbox } from "./ui/checkbox"
 
 const TodoItem = ({ todo }: { todo: Todo }) => {
-  const [deleting, setDeleting] = useState(false)
+  const toggleMutation = useToggleTodo()
+  const deleteMutation = useDeleteTodo()
+  const handleToggle = async () => {
+    try {
+      const res = await toggleMutation.mutateAsync(todo._id)
+      if (!res.success) toast.error('Error: ' + res.error || '')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to update todo status',)
+    }
+  }
+  const handleDelete = async () => {
+    try {
+      const res = await deleteMutation.mutateAsync(todo._id)
+      if (res.success) toast.success('Todo deleted successfully')
+      else toast.error('Error: ' + res.error || '')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to delete todo')
+    }
+  }
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -25,7 +46,7 @@ const TodoItem = ({ todo }: { todo: Todo }) => {
     <Card className={cn('transition-all duration-200 hover:shadow-md', todo.completed && 'opacity-75')}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <Checkbox checked={todo.completed} onCheckedChange={() => { }} disabled={false} className="mt-1" />
+          <Checkbox checked={todo.completed} onCheckedChange={handleToggle} disabled={false} className="mt-1" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <h3 className={cn('font-medium text-sm', todo.completed && 'line-through text-muted-foreground')}>
@@ -48,7 +69,7 @@ const TodoItem = ({ todo }: { todo: Todo }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant='ghost' size='sm' onClick={() => { }} disabled={false} className={cn('h-8 w-8 p-0', deleting && 'bg-destructive text-destructive')}>
+            <Button variant='ghost' size='sm' onClick={handleDelete} disabled={deleteMutation.isPending} className={cn('h-8 w-8 p-0', deleteMutation.isPending && 'bg-destructive text-destructive')}>
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>

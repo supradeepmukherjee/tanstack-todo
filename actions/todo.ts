@@ -64,3 +64,25 @@ export const toggleTodo = async (id: string) => {
         }
     }
 }
+
+export const deleteTodo = async (id: string) => {
+    try {
+        await connectDb()
+        const todo = await Todo.findByIdAndDelete(id)
+        if (!todo) return {
+            success: false,
+            error: 'Todo not found'
+        }
+        revalidatePath('/')
+        return {
+            success:true,
+            data:JSON.parse(JSON.stringify(todo))
+        }
+    } catch (err) {
+        console.error(err);
+        return {
+            success: false,
+            error: 'Failed to delete TODO'
+        }
+    }
+}

@@ -23,6 +23,8 @@ export const useStore = create(
         },
         completedCount: () => get().todos.filter((todo: { completed: boolean }) => todo.completed).length,
         activeCount: () => get().todos.filter((todo: { completed: boolean }) => !todo.completed).length,
+        updateTodo: (id: string, update: object) => set(state => ({ todos: state.todos.map(t => t._id === id ? { ...t, ...update } : t) })),
+        deleteTodo: (id: string) => set(state => ({ todos: state.todos.filter(t => t._id !== id) }))
     }),
         { name: 'todoStore' }
     )
