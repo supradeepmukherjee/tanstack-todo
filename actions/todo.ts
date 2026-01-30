@@ -34,9 +34,33 @@ export const getTodos = async () => {
         }
     } catch (err) {
         console.error(err);
-        return{
-            success:false,
-            error:'Failed to fetch TODOs'
+        return {
+            success: false,
+            error: 'Failed to fetch TODOs'
+        }
+    }
+}
+
+export const toggleTodo = async (id: string) => {
+    try {
+        await connectDb()
+        const todo = await Todo.findById(id)
+        if (!todo) return {
+            success: false,
+            error: 'Todo not found'
+        }
+        todo.completed = !todo.completed
+        await todo.save()
+        revalidatePath('/')
+        return {
+            success:true,
+            data:JSON.parse(JSON.stringify(todo))
+        }
+    } catch (err) {
+        console.error(err);
+        return {
+            success: false,
+            error: 'Failed to toggle TODO'
         }
     }
 }

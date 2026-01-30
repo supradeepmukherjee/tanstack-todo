@@ -5,10 +5,26 @@ import { Loader2 } from "lucide-react"
 import { useStore } from "@/store"
 import TodoItem from "./TodoItem"
 import { Todo } from "@/types/Todo"
+import { useEffect, useMemo } from "react"
 
 const TodoList = () => {
-    const { data, isLoading, error } = useTodos()
-    const filteredTodos = useStore(s => s.filteredTodos())
+    const { isLoading, error } = useTodos()
+    const filter = useStore(s => s.filter)
+    const todos = useStore(s => s.todos)
+    const setTodos = useStore(s => s.setTodos)
+    const filteredTodos = useMemo(() => {
+        switch (filter) {
+            case 'active':
+                return todos?.filter(t => !t.completed)
+            case 'completed':
+                return todos?.filter(t => t.completed)
+            default:
+                return todos
+        }
+    }, [filter, todos])
+    useEffect(() => {
+        if (todos) setTodos(todos)
+    }, [setTodos, todos])
     if (isLoading) return (
         <Card >
             <CardContent className="p-8 text-center">
@@ -28,18 +44,18 @@ const TodoList = () => {
             </CardContent>
         </Card>
     )
-    if (filteredTodos.length === 0) return (
+    if (filteredTodos?.length === 0) return (
         <Card>
             <CardContent className="p-8 text-center">
                 <p className="text-muted-foreground">
-                    {data?.length === 0 ? 'No todos created.' : 'No todos match the current filter'}
+                    {todos?.length === 0 ? 'No todos created.' : 'No todos match the current filter'}
                 </p>
             </CardContent>
         </Card>
     )
     return (
         <div className="space-y-3">
-            {filteredTodos.map((t: Todo) => <TodoItem todo={t} key={t._id} />)}
+            {filteredTodos?.map((t: Todo) => <TodoItem todo={t} key={t._id} />)}
         </div>
     )
 }
